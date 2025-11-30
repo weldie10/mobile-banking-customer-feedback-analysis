@@ -200,20 +200,79 @@ Omega Consultancy is supporting three major Ethiopian banks—Commercial Bank of
 
 ## Page 4: Next Steps and Key Areas of Focus
 
-### 4.1 Immediate Next Steps
+### 4.1 Immediate Next Steps - Task 3 & Task 4 Implementation
 
-**Table 4.1: Execution Roadmap**
+**Table 4.1: Task 3 - Database Integration Roadmap**
 
-| Task | Action | Deliverable | Timeline | Success Criteria |
-|------|--------|-------------|---------|-----------------|
-| **1. Sentiment Analysis** | Run `task2_sentiment.py` on 9,572 reviews | `all_banks_with_sentiment.csv` | Immediate | 90%+ coverage |
-| **2. Thematic Analysis** | Run `task2_thematic.py` for each bank | `all_banks_with_sentiment_themes.csv` | Immediate | 3-5 themes per bank |
-| **3. Database Integration** | Design PostgreSQL schema | Populated database | Week 3 | All data stored |
-| **4. Visualization** | Create dashboards and charts | Visual report | Week 3 | Clear insights |
+| Component | Action | Deliverable | Success Criteria |
+|-----------|--------|-------------|------------------|
+| **Schema Design** | Design PostgreSQL database schema | ER diagram, schema SQL | Normalized tables, relationships defined |
+| **Table Creation** | Create tables: reviews, sentiment_scores, themes, bank_metrics | Database schema file | All tables with proper constraints |
+| **Data Migration** | Load cleaned data from CSV to PostgreSQL | Populated database | 100% data migrated, integrity verified |
+| **Indexing** | Create indexes on key columns | Optimized queries | Fast query performance |
+| **Connection Script** | Develop Python script for database operations | `task3_database.py` | CRUD operations functional |
 
-### 4.2 Key Focus Areas by Business Scenario
+**Table 4.2: Task 4 - Visualization and Reporting Roadmap**
 
-**Table 4.2: Scenario 1 - Retaining Users (Slow Loading Investigation)**
+| Component | Action | Deliverable | Success Criteria |
+|-----------|--------|-------------|------------------|
+| **Dashboard Design** | Design interactive dashboard layout | Dashboard mockup | All key metrics visualized |
+| **Visualization Scripts** | Create visualization scripts using matplotlib/seaborn | `task4_visualization.py` | Charts for all scenarios |
+| **Key Visualizations** | Generate: sentiment distribution, theme analysis, bank comparison | PNG/PDF charts | Clear, actionable insights |
+| **Report Generation** | Create comprehensive analysis report | Final report document | All scenarios addressed |
+| **Presentation** | Prepare stakeholder presentation | Presentation slides | Clear recommendations |
+
+### 4.2 Task 3: Database Integration Details
+
+**Table 4.3: Database Schema Design**
+
+| Table Name | Purpose | Key Columns | Relationships |
+|------------|---------|-------------|--------------|
+| **reviews** | Store raw review data | review_id, bank, rating, review, date, source | Primary table |
+| **sentiment_scores** | Store sentiment analysis results | review_id, sentiment_label, sentiment_score, model_used | Foreign key to reviews |
+| **themes** | Store identified themes | theme_id, theme_name, keywords | Many-to-many with reviews |
+| **review_themes** | Junction table | review_id, theme_id, confidence_score | Links reviews to themes |
+| **bank_metrics** | Store aggregated metrics | bank, metric_name, metric_value, calculation_date | Aggregated from reviews |
+
+**Table 4.4: Database Implementation Tasks**
+
+| Task | Description | Priority |
+|------|-------------|----------|
+| **Schema Design** | Design normalized schema with proper relationships | Critical |
+| **Data Types** | Define appropriate data types (VARCHAR, INTEGER, DATE, FLOAT) | High |
+| **Constraints** | Add primary keys, foreign keys, check constraints | High |
+| **Indexes** | Create indexes on bank, date, rating, sentiment_label | Medium |
+| **Data Loading** | Write ETL script to load CSV data into PostgreSQL | Critical |
+| **Data Validation** | Verify data integrity after loading | Critical |
+| **Query Optimization** | Optimize queries for dashboard performance | Medium |
+
+### 4.3 Task 4: Visualization and Reporting Details
+
+**Table 4.5: Required Visualizations**
+
+| Visualization Type | Purpose | Data Source | Use Case |
+|-------------------|--------|-------------|----------|
+| **Sentiment Distribution** | Show sentiment breakdown by bank | sentiment_scores | Overall satisfaction overview |
+| **Rating Distribution** | Display rating distribution charts | reviews | Customer satisfaction levels |
+| **Theme Frequency** | Bar chart of theme frequency per bank | themes, review_themes | Identify common issues |
+| **Bank Comparison** | Side-by-side comparison charts | All tables | Competitive analysis |
+| **Trend Analysis** | Time series of sentiment over time | reviews, sentiment_scores | Identify improvement trends |
+| **Pain Points Heatmap** | Heatmap of issues by bank and theme | review_themes | Prioritize improvements |
+| **Feature Requests** | Word cloud or bar chart of requested features | themes (Feature Requests) | Scenario 2 analysis |
+| **Complaint Categories** | Pie chart of complaint types | themes (Account Access, Support) | Scenario 3 analysis |
+
+**Table 4.6: Report Structure for Task 4**
+
+| Section | Content | Visualizations |
+|---------|---------|----------------|
+| **Executive Summary** | Key findings, recommendations | High-level dashboard |
+| **Scenario 1 Analysis** | Slow loading investigation | Performance charts, correlation analysis |
+| **Scenario 2 Analysis** | Feature enhancement recommendations | Feature request charts, gap analysis |
+| **Scenario 3 Analysis** | Complaint management strategy | Complaint clustering, chatbot training data |
+| **Bank-Specific Insights** | Individual bank recommendations | Bank comparison charts |
+| **Action Plan** | Prioritized recommendations | Roadmap visualization |
+
+### 4.4 Key Focus Areas by Business Scenario
 
 | Focus Area | Analysis Method | Expected Output | Priority |
 |------------|----------------|-----------------|----------|
@@ -222,7 +281,7 @@ Omega Consultancy is supporting three major Ethiopian banks—Commercial Bank of
 | **Bank Comparison** | Compare slow loading complaints across banks | Bank-specific performance issues | High |
 | **Recommendations** | Prioritize optimization areas | Performance roadmap | Critical |
 
-**Table 4.3: Scenario 2 - Enhancing Features (Competitive Analysis)**
+**Table 4.7: Scenario 1 - Retaining Users (Slow Loading Investigation)**
 
 | Focus Area | Analysis Method | Expected Output | Priority |
 |------------|----------------|-----------------|----------|
@@ -231,7 +290,16 @@ Omega Consultancy is supporting three major Ethiopian banks—Commercial Bank of
 | **Key Features** | Analyze: fingerprint login, transaction history, notifications | Prioritized feature list | High |
 | **Recommendations** | Rank features by frequency and impact | Feature development roadmap | High |
 
-**Table 4.4: Scenario 3 - Managing Complaints (Support Optimization)**
+**Table 4.8: Scenario 2 - Enhancing Features (Competitive Analysis)**
+
+| Focus Area | Analysis Method | Expected Output | Priority |
+|------------|----------------|-----------------|----------|
+| **Feature Requests** | Extract feature-related keywords | Top requested features per bank | High |
+| **Competitive Positioning** | Compare feature coverage across banks | Feature gap analysis | Medium |
+| **Key Features** | Analyze: fingerprint login, transaction history, notifications | Prioritized feature list | High |
+| **Recommendations** | Rank features by frequency and impact | Feature development roadmap | High |
+
+**Table 4.9: Scenario 3 - Managing Complaints (Support Optimization)**
 
 | Focus Area | Analysis Method | Expected Output | Priority |
 |------------|----------------|-----------------|----------|
@@ -240,35 +308,59 @@ Omega Consultancy is supporting three major Ethiopian banks—Commercial Bank of
 | **Support Efficiency** | Track complaint frequency and trends | Support optimization strategy | Medium |
 | **Resolution Mapping** | Map complaints to resolution strategies | Support playbook | High |
 
-### 4.3 Deliverables Roadmap
+### 4.5 Deliverables Roadmap - Task 3 & Task 4 Focus
 
-**Table 4.5: Project Timeline and Deliverables**
+**Table 4.10: Project Timeline and Deliverables**
 
-| Week | Deliverables | Status |
-|------|-------------|--------|
-| **Week 2 (Current)** | ✅ Data collection (9,572 reviews)<br>✅ Preprocessing pipeline<br>✅ Sentiment analysis scripts<br>✅ Thematic analysis scripts<br>⏳ Execute analysis<br>⏳ Initial insights report | In Progress |
-| **Week 3** | Database schema design<br>Data visualization dashboard<br>Comprehensive analysis report<br>Bank-specific recommendations | Planned |
-| **Week 4** | Final report presentation<br>Stakeholder review<br>Implementation roadmap | Planned |
+| Week | Task | Deliverables | Status |
+|------|------|-------------|--------|
+| **Week 2 (Completed)** | **Task 1 & Task 2** | ✅ Data collection (9,572 reviews)<br>✅ Preprocessing pipeline<br>✅ Sentiment analysis scripts<br>✅ Thematic analysis scripts | ✅ Complete |
+| **Week 3 (Current)** | **Task 3: Database** | ⏳ PostgreSQL schema design<br>⏳ Database implementation<br>⏳ Data migration scripts<br>⏳ Data loading and validation | In Progress |
+| **Week 4 (Next)** | **Task 4: Visualization** | ⏳ Visualization scripts<br>⏳ Dashboard creation<br>⏳ Comprehensive analysis report<br>⏳ Bank-specific recommendations<br>⏳ Final presentation | Planned |
 
-### 4.4 Success Metrics for Next Phase
+### 4.6 Success Metrics for Task 3 & Task 4
 
-**Table 4.6: Next Phase Success Criteria**
+**Table 4.11: Task 3 Success Criteria**
 
 | Metric Category | Target | Measurement Method |
 |----------------|--------|-------------------|
-| **Analysis Completion** | 100% reviews analyzed for sentiment<br>3-5 themes per bank with statistical significance<br>All 3 scenarios addressed | Coverage reports, theme validation |
-| **Actionability** | Top 5 pain points per bank<br>Top 5 satisfaction drivers per bank<br>Prioritized recommendations with impact | Ranked lists, impact scores |
-| **Stakeholder Value** | Clear visual presentation<br>Bank-specific action plans<br>Measurable improvement targets | Report quality, stakeholder feedback |
+| **Schema Design** | Normalized schema with proper relationships | ER diagram review, schema validation |
+| **Data Migration** | 100% of reviews loaded into database | Data count verification, integrity checks |
+| **Query Performance** | All queries execute in <2 seconds | Performance testing |
+| **Data Integrity** | Zero data loss, all constraints satisfied | Validation scripts |
 
-### 4.5 Advanced Analysis Opportunities
+**Table 4.12: Task 4 Success Criteria**
 
-**Table 4.7: Future Analysis Enhancements**
+| Metric Category | Target | Measurement Method |
+|----------------|--------|-------------------|
+| **Visualization Coverage** | All 8 visualization types created | Visualization checklist |
+| **Report Completeness** | All 3 scenarios addressed with data-driven insights | Report review, stakeholder feedback |
+| **Actionability** | Top 5 pain points per bank identified<br>Top 5 satisfaction drivers per bank identified<br>Prioritized recommendations with impact | Ranked lists, impact scores |
+| **Stakeholder Value** | Clear visual presentation<br>Bank-specific action plans<br>Measurable improvement targets | Presentation quality, feedback |
 
-| Analysis Type | Description | Value |
-|---------------|-------------|-------|
-| **Temporal Analysis** | Trend analysis over time, update impact correlation | Identify improvement patterns |
-| **Comparative Analysis** | Bank-to-bank comparison, best practice identification | Cross-bank learning |
-| **Predictive Insights** | Churn risk identification, feature impact prediction | Proactive improvements |
+### 4.7 Task 3 & Task 4 Implementation Checklist
+
+**Table 4.13: Task 3 Implementation Checklist**
+
+| Task | Component | Status | Notes |
+|------|-----------|-------|-------|
+| **Database Setup** | Install PostgreSQL | ⏳ | Local or cloud instance |
+| **Schema Design** | Create ER diagram | ⏳ | Normalize to 3NF |
+| **Table Creation** | Write CREATE TABLE statements | ⏳ | Include constraints |
+| **Data Migration** | Write ETL script | ⏳ | Load from CSV |
+| **Testing** | Verify data integrity | ⏳ | Run validation queries |
+| **Documentation** | Document schema and procedures | ⏳ | For future reference |
+
+**Table 4.14: Task 4 Implementation Checklist**
+
+| Task | Component | Status | Notes |
+|------|-----------|-------|-------|
+| **Visualization Setup** | Install matplotlib, seaborn | ⏳ | Or use Plotly for interactivity |
+| **Chart Creation** | Create all 8 visualization types | ⏳ | Follow design guidelines |
+| **Report Writing** | Write comprehensive analysis report | ⏳ | Address all 3 scenarios |
+| **Dashboard** | Create interactive dashboard | ⏳ | Optional but recommended |
+| **Presentation** | Prepare stakeholder presentation | ⏳ | Highlight key insights |
+| **Documentation** | Document visualization code | ⏳ | For reproducibility |
 
 ---
 
@@ -276,15 +368,17 @@ Omega Consultancy is supporting three major Ethiopian banks—Commercial Bank of
 
 This project has successfully established a robust foundation for customer experience analytics through comprehensive data collection (9,572 reviews, 697% of target) and preprocessing (<1% missing data, exceeding 5% KPI threshold). The implementation of advanced sentiment and thematic analysis pipelines positions Omega Consultancy to deliver actionable insights that will directly impact customer retention and satisfaction for CBE, BOA, and Dashen Bank.
 
-**Key Achievements:**
+**Key Achievements (Task 1 & Task 2):**
 - ✅ 9,572 reviews collected (exceeds 1,200 requirement by 697%)
 - ✅ <1% missing data (exceeds <5% KPI threshold)
 - ✅ Complete preprocessing pipeline implemented
 - ✅ Sentiment and thematic analysis scripts ready
 - ✅ All three business scenarios addressed with analysis framework
 
-**Next Phase Focus:**
-Execute sentiment and thematic analysis, generate visualizations, and deliver bank-specific recommendations addressing user retention, feature enhancement, and complaint management scenarios.
+**Next Phase Focus - Task 3 & Task 4:**
+**Task 3 (Database Integration):** Design and implement PostgreSQL database schema, migrate all cleaned and analyzed data, ensure data integrity and query performance optimization.
+
+**Task 4 (Visualization & Reporting):** Create comprehensive visualizations for all three business scenarios, generate actionable analysis report with bank-specific recommendations, and prepare stakeholder presentation.
 
 ---
 
