@@ -12,6 +12,7 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassifica
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import os
 import warnings
+from utils import clean_text
 warnings.filterwarnings('ignore')
 
 # Initialize VADER as fallback
@@ -111,10 +112,15 @@ def analyze_sentiment(text):
     if not text or pd.isna(text) or str(text).strip() == '':
         return 'neutral', 0.0
     
+    # Clean text before analysis
+    cleaned_text = clean_text(str(text))
+    if not cleaned_text:
+        return 'neutral', 0.0
+    
     if USE_DISTILBERT:
-        return analyze_sentiment_distilbert(str(text))
+        return analyze_sentiment_distilbert(cleaned_text)
     else:
-        return analyze_sentiment_vader(str(text))
+        return analyze_sentiment_vader(cleaned_text)
 
 
 def aggregate_sentiment_by_bank(df):
