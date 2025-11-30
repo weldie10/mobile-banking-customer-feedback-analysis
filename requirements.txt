@@ -1,0 +1,23 @@
+pandas
+numpy
+google-play-scraper
+requests
+
+# NLP
+textblob
+vaderSentiment
+nltk
+scikit-learn
+transformers
+torch
+spacy
+
+# Database
+psycopg2-binary
+
+# Visualization
+matplotlib
+
+# Utilities
+python-dotenv
+pytest
