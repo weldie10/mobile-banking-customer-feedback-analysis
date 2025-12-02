@@ -1,8 +1,6 @@
 """
-Task 2: Thematic Analysis Script
+Task 2: Thematic Analysis Script (OOP Version)
 Extracts keywords and clusters them into themes for each bank.
-
-Uses TF-IDF for keyword extraction and manual/rule-based clustering.
 """
 
 import pandas as pd
@@ -12,94 +10,94 @@ import re
 import os
 from collections import Counter
 import warnings
+from typing import List, Dict, Tuple, Any
+
 warnings.filterwarnings('ignore')
 
-# Try to import spacy for advanced NLP
+# Try to import spacy
 try:
     import spacy
     nlp = spacy.load("en_core_web_sm")
     USE_SPACY = True
 except:
-    print("spaCy not available, using basic text processing")
     USE_SPACY = False
 
 
-def preprocess_text(text):
-    """
-    Preprocess text for keyword extraction.
+class TextPreprocessor:
+    """Handles text preprocessing for thematic analysis."""
     
-    Args:
-        text: Raw review text
-    
-    Returns:
-        Preprocessed text
-    """
-    if pd.isna(text):
-        return ""
-    
-    text = str(text).lower()
-    # Remove special characters but keep spaces
-    text = re.sub(r'[^a-z0-9\s]', ' ', text)
-    # Remove extra whitespace
-    text = ' '.join(text.split())
-    
-    return text
-
-
-def extract_keywords_tfidf(reviews, max_features=50, ngram_range=(1, 2)):
-    """
-    Extract keywords using TF-IDF.
-    
-    Args:
-        reviews: List of review texts
-        max_features: Maximum number of features to extract
-        ngram_range: Range of n-grams to consider
-    
-    Returns:
-        List of keywords and their importance scores
-    """
-    # Preprocess reviews
-    processed_reviews = [preprocess_text(review) for review in reviews]
-    
-    # Create TF-IDF vectorizer
-    vectorizer = TfidfVectorizer(
-        max_features=max_features,
-        ngram_range=ngram_range,
-        stop_words='english',
-        min_df=2,  # Word must appear in at least 2 documents
-        max_df=0.95  # Word must appear in less than 95% of documents
-    )
-    
-    try:
-        tfidf_matrix = vectorizer.fit_transform(processed_reviews)
-        feature_names = vectorizer.get_feature_names_out()
+    @staticmethod
+    def preprocess(text: str) -> str:
+        """
+        Preprocess text for keyword extraction.
         
-        # Get mean TF-IDF scores for each feature
-        mean_scores = np.array(tfidf_matrix.mean(axis=0)).flatten()
+        Args:
+            text: Raw review text
         
-        # Create keyword-score pairs
-        keywords = list(zip(feature_names, mean_scores))
-        keywords.sort(key=lambda x: x[1], reverse=True)
+        Returns:
+            Preprocessed text
+        """
+        if pd.isna(text):
+            return ""
         
-        return keywords
-    except Exception as e:
-        print(f"Error in TF-IDF extraction: {e}")
-        return []
+        text = str(text).lower()
+        text = re.sub(r'[^a-z0-9\s]', ' ', text)
+        text = ' '.join(text.split())
+        return text
 
 
-def cluster_keywords_into_themes(keywords, bank_name):
-    """
-    Cluster keywords into themes using rule-based approach.
+class KeywordExtractor:
+    """Extracts keywords using TF-IDF."""
     
-    Args:
-        keywords: List of (keyword, score) tuples
-        bank_name: Name of the bank (for context)
+    def __init__(self, max_features: int = 50, ngram_range: Tuple[int, int] = (1, 2)):
+        """
+        Initialize the keyword extractor.
+        
+        Args:
+            max_features: Maximum number of features to extract
+            ngram_range: Range of n-grams to consider
+        """
+        self.max_features = max_features
+        self.ngram_range = ngram_range
+        self.preprocessor = TextPreprocessor()
     
-    Returns:
-        Dictionary mapping themes to keywords
-    """
-    # Define theme patterns/keywords
-    theme_patterns = {
+    def extract(self, reviews: List[str]) -> List[Tuple[str, float]]:
+        """
+        Extract keywords using TF-IDF.
+        
+        Args:
+            reviews: List of review texts
+        
+        Returns:
+            List of (keyword, score) tuples
+        """
+        processed_reviews = [self.preprocessor.preprocess(review) for review in reviews]
+        
+        vectorizer = TfidfVectorizer(
+            max_features=self.max_features,
+            ngram_range=self.ngram_range,
+            stop_words='english',
+            min_df=2,
+            max_df=0.95
+        )
+        
+        try:
+            tfidf_matrix = vectorizer.fit_transform(processed_reviews)
+            feature_names = vectorizer.get_feature_names_out()
+            mean_scores = np.array(tfidf_matrix.mean(axis=0)).flatten()
+            
+            keywords = list(zip(feature_names, mean_scores))
+            keywords.sort(key=lambda x: x[1], reverse=True)
+            return keywords
+        except Exception as e:
+            print(f"Error in TF-IDF extraction: {e}")
+            return []
+
+
+class ThemeClusterer:
+    """Clusters keywords into themes."""
+    
+    THEME_PATTERNS = {
         'Account Access Issues': [
             'login', 'password', 'account', 'access', 'unable', 'cannot', 'error',
             'failed', 'blocked', 'locked', 'verify', 'authentication'
@@ -130,98 +128,100 @@ def cluster_keywords_into_themes(keywords, bank_name):
         ]
     }
     
-    # Map keywords to themes
-    theme_keywords = {theme: [] for theme in theme_patterns.keys()}
-    unassigned = []
-    
-    for keyword, score in keywords:
-        keyword_lower = keyword.lower()
-        assigned = False
+    def cluster(self, keywords: List[Tuple[str, float]], bank_name: str) -> Dict[str, List[Tuple[str, float]]]:
+        """
+        Cluster keywords into themes.
         
-        for theme, patterns in theme_patterns.items():
-            for pattern in patterns:
-                if pattern in keyword_lower or keyword_lower in pattern:
-                    theme_keywords[theme].append((keyword, score))
-                    assigned = True
+        Args:
+            keywords: List of (keyword, score) tuples
+            bank_name: Name of the bank
+        
+        Returns:
+            Dictionary mapping themes to keywords
+        """
+        theme_keywords = {theme: [] for theme in self.THEME_PATTERNS.keys()}
+        unassigned = []
+        
+        for keyword, score in keywords:
+            keyword_lower = keyword.lower()
+            assigned = False
+            
+            for theme, patterns in self.THEME_PATTERNS.items():
+                for pattern in patterns:
+                    if pattern in keyword_lower or keyword_lower in pattern:
+                        theme_keywords[theme].append((keyword, score))
+                        assigned = True
+                        break
+                if assigned:
                     break
-            if assigned:
-                break
+            
+            if not assigned:
+                unassigned.append((keyword, score))
         
-        if not assigned:
-            unassigned.append((keyword, score))
+        theme_keywords = {k: v for k, v in theme_keywords.items() if v}
+        
+        if unassigned:
+            theme_keywords['General'] = unassigned[:10]
+        
+        return theme_keywords
     
-    # Filter out themes with no keywords
-    theme_keywords = {k: v for k, v in theme_keywords.items() if v}
-    
-    # If we have unassigned keywords, create a "General" theme
-    if unassigned:
-        theme_keywords['General'] = unassigned[:10]  # Top 10 unassigned
-    
-    return theme_keywords
+    def identify_themes_in_review(self, review_text: str, 
+                                  theme_keywords: Dict[str, List[Tuple[str, float]]]) -> List[str]:
+        """
+        Identify which themes are present in a review.
+        
+        Args:
+            review_text: Review text
+            theme_keywords: Dictionary of themes and their keywords
+        
+        Returns:
+            List of theme names
+        """
+        review_lower = TextPreprocessor.preprocess(review_text)
+        identified_themes = []
+        
+        for theme, keywords in theme_keywords.items():
+            for keyword, _ in keywords:
+                if keyword in review_lower:
+                    identified_themes.append(theme)
+                    break
+        
+        return identified_themes
 
 
-def identify_review_themes(review_text, theme_keywords):
-    """
-    Identify which themes are present in a review.
+class ThematicAnalyzer:
+    """Main class for thematic analysis."""
     
-    Args:
-        review_text: Review text
-        theme_keywords: Dictionary of themes and their keywords
+    def __init__(self):
+        """Initialize the thematic analyzer."""
+        self.keyword_extractor = KeywordExtractor()
+        self.theme_clusterer = ThemeClusterer()
+        self.preprocessor = TextPreprocessor()
     
-    Returns:
-        List of theme names present in the review
-    """
-    review_lower = preprocess_text(review_text)
-    identified_themes = []
-    
-    for theme, keywords in theme_keywords.items():
-        for keyword, _ in keywords:
-            if keyword in review_lower:
-                identified_themes.append(theme)
-                break  # Only need one keyword match per theme
-    
-    return identified_themes
-
-
-def main():
-    """Main thematic analysis function."""
-    print("Starting thematic analysis...")
-    print("=" * 50)
-    
-    # Read data with sentiment analysis
-    input_file = '../Data/all_banks_with_sentiment.csv'
-    
-    # Fallback to basic data if sentiment file doesn't exist
-    if not os.path.exists(input_file):
-        input_file = '../Data/all_banks.csv'
-        print(f"Sentiment file not found, using: {input_file}")
-    
-    if not os.path.exists(input_file):
-        print(f"Error: Input file not found: {input_file}")
-        print("Please run task1_preprocessing.py first")
-        return
-    
-    df = pd.read_csv(input_file)
-    print(f"Loaded {len(df)} reviews from {input_file}")
-    
-    # Analyze themes for each bank
-    all_results = []
-    
-    for bank in df['bank'].unique():
-        print(f"\nAnalyzing themes for {bank}...")
-        bank_df = df[df['bank'] == bank].copy()
+    def analyze_bank(self, bank_df: pd.DataFrame, bank_name: str) -> pd.DataFrame:
+        """
+        Analyze themes for a specific bank.
+        
+        Args:
+            bank_df: DataFrame with reviews for one bank
+            bank_name: Name of the bank
+        
+        Returns:
+            DataFrame with themes added
+        """
+        print(f"\nAnalyzing themes for {bank_name}...")
         bank_reviews = bank_df['review'].tolist()
         
         # Extract keywords
         print(f"  Extracting keywords from {len(bank_reviews)} reviews...")
-        keywords = extract_keywords_tfidf(bank_reviews, max_features=50)
+        keywords = self.keyword_extractor.extract(bank_reviews)
         
         print(f"  Found {len(keywords)} keywords")
         print(f"  Top 10 keywords: {[k[0] for k in keywords[:10]]}")
         
         # Cluster into themes
         print(f"  Clustering keywords into themes...")
-        theme_keywords = cluster_keywords_into_themes(keywords, bank)
+        theme_keywords = self.theme_clusterer.cluster(keywords, bank_name)
         
         print(f"  Identified {len(theme_keywords)} themes:")
         for theme, kw_list in theme_keywords.items():
@@ -230,56 +230,121 @@ def main():
         
         # Identify themes for each review
         print(f"  Identifying themes in reviews...")
+        bank_df = bank_df.copy()
         bank_df['themes'] = bank_df['review'].apply(
-            lambda x: identify_review_themes(x, theme_keywords)
+            lambda x: self.theme_clusterer.identify_themes_in_review(x, theme_keywords)
+        )
+        bank_df['themes_str'] = bank_df['themes'].apply(
+            lambda x: '; '.join(x) if x else 'None'
         )
         
-        # Convert themes list to string for CSV storage
-        bank_df['themes_str'] = bank_df['themes'].apply(lambda x: '; '.join(x) if x else 'None')
+        return bank_df
+    
+    def analyze_all_banks(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Analyze themes for all banks.
         
-        all_results.append(bank_df)
-    
-    # Combine all banks
-    result_df = pd.concat(all_results, ignore_index=True)
-    
-    # Check KPI: 3+ themes per bank
-    print("\n" + "=" * 50)
-    print("Thematic Analysis Summary")
-    print("=" * 50)
-    
-    for bank in result_df['bank'].unique():
-        bank_df = result_df[result_df['bank'] == bank]
-        # Count unique themes
-        all_themes = []
-        for themes_list in bank_df['themes']:
-            all_themes.extend(themes_list)
-        unique_themes = set(all_themes)
+        Args:
+            df: DataFrame with reviews
         
-        print(f"\n{bank}:")
-        print(f"  Unique themes identified: {len(unique_themes)}")
-        print(f"  Themes: {', '.join(sorted(unique_themes))}")
+        Returns:
+            DataFrame with themes added
+        """
+        all_results = []
         
-        # Theme frequency
-        theme_counts = Counter(all_themes)
-        print(f"  Top themes:")
-        for theme, count in theme_counts.most_common(5):
-            print(f"    - {theme}: {count} reviews")
+        for bank in df['bank'].unique():
+            bank_df = df[df['bank'] == bank]
+            bank_result = self.analyze_bank(bank_df, bank)
+            all_results.append(bank_result)
         
-        if len(unique_themes) >= 3:
-            print(f"  ✓ KPI met: >=3 themes identified")
-        else:
-            print(f"  ✗ KPI not met: <3 themes identified")
+        return pd.concat(all_results, ignore_index=True)
     
-    print("=" * 50 + "\n")
+    def generate_summary(self, df: pd.DataFrame):
+        """Generate thematic analysis summary."""
+        print("\n" + "=" * 50)
+        print("Thematic Analysis Summary")
+        print("=" * 50)
+        
+        for bank in df['bank'].unique():
+            bank_df = df[df['bank'] == bank]
+            all_themes = []
+            
+            for themes_list in bank_df['themes']:
+                all_themes.extend(themes_list)
+            
+            unique_themes = set(all_themes)
+            theme_counts = Counter(all_themes)
+            
+            print(f"\n{bank}:")
+            print(f"  Unique themes identified: {len(unique_themes)}")
+            print(f"  Themes: {', '.join(sorted(unique_themes))}")
+            print(f"  Top themes:")
+            for theme, count in theme_counts.most_common(5):
+                print(f"    - {theme}: {count} reviews")
+            
+            if len(unique_themes) >= 3:
+                print(f"  ✓ KPI met: >=3 themes identified")
+            else:
+                print(f"  ✗ KPI not met: <3 themes identified")
+        
+        print("=" * 50 + "\n")
+
+
+class ThematicAnalysisPipeline:
+    """Complete pipeline for thematic analysis."""
     
-    # Save results
-    output_file = '../Data/all_banks_with_sentiment_themes.csv'
-    result_df.to_csv(output_file, index=False)
-    print(f"Results saved to: {output_file}")
+    def __init__(self, input_file: str = '../Data/all_banks_with_sentiment.csv',
+                 output_file: str = '../Data/all_banks_with_sentiment_themes.csv'):
+        """
+        Initialize the pipeline.
+        
+        Args:
+            input_file: Path to input CSV
+            output_file: Path to output CSV
+        """
+        self.input_file = input_file
+        self.output_file = output_file
+        self.analyzer = ThematicAnalyzer()
     
-    return result_df
+    def run(self) -> pd.DataFrame:
+        """
+        Run the complete thematic analysis pipeline.
+        
+        Returns:
+            DataFrame with thematic analysis results
+        """
+        print("Starting thematic analysis...")
+        print("=" * 50)
+        
+        # Try to find input file
+        if not os.path.exists(self.input_file):
+            self.input_file = '../Data/all_banks.csv'
+            print(f"Sentiment file not found, using: {self.input_file}")
+        
+        if not os.path.exists(self.input_file):
+            raise FileNotFoundError(f"Input file not found: {self.input_file}. Please run task1_preprocessing.py first")
+        
+        df = pd.read_csv(self.input_file)
+        print(f"Loaded {len(df)} reviews from {self.input_file}")
+        
+        # Analyze themes
+        df = self.analyzer.analyze_all_banks(df)
+        
+        # Generate summary
+        self.analyzer.generate_summary(df)
+        
+        # Save results
+        df.to_csv(self.output_file, index=False)
+        print(f"Results saved to: {self.output_file}")
+        
+        return df
+
+
+def main():
+    """Main function for backward compatibility."""
+    pipeline = ThematicAnalysisPipeline()
+    return pipeline.run()
 
 
 if __name__ == "__main__":
     df = main()
-
